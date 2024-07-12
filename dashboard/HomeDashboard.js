@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 
@@ -18,28 +18,30 @@ const HomeDashboard = () => {
       <Text style={[styles.title, { color: theme.colors.gnt_outline }]}>Hi user</Text>
       <Text style={[styles.quote, { color: theme.colors.gnt_outline }]}>Good day to start exercise.</Text>
 
+      <ScrollView>
+        <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Eye Exercise</Text>
+        <TouchableOpacity onPress={navigateToEyeExercise}>
+          <View style={styles.card}>
+            <Image source={require('../assets/dashboardassets/speciallyforyou.jpg')} style={styles.image} />
+          </View>
+        </TouchableOpacity>
 
-      <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Eye Exercise</Text>
+        <TouchableOpacity onPress={navigateToEyeExercise}>
+          <View style={styles.card}>
+            <Image source={require('../assets/dashboardassets/fulleyeexercise.jpg')} style={styles.image} />
+          </View>
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={navigateToEyeExercise}>
+        <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Health Tips</Text>
         <View style={styles.card}>
-          <Image source={require('../assets/dashboardassets/speciallyforyou.png')} style={styles.image} />
+          <Image source={require('../assets/dashboardassets/healthtips.jpg')} style={styles.image} />
         </View>
-      </TouchableOpacity>
 
-      <View style={styles.card}>
-        <Image source={require('../assets/dashboardassets/fulleyeexercise.png')} style={styles.image} />
-      </View>
-
-      <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Health Tips</Text>
-      <View style={styles.card}>
-        <Image source={require('../assets/dashboardassets/firstlayoutimage.jpg')} style={styles.image} />
-      </View>
-
-      <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Focus Mode</Text>
-      <View style={styles.card}>
-        <Image source={require('../assets/dashboardassets/firstlayoutimage.jpg')} style={styles.image} />
-      </View>
+        <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Focus Mode</Text>
+        <View style={styles.card}>
+          <Image source={require('../assets/dashboardassets/focusmode.jpg')} style={styles.image} />
+        </View>
+      </ScrollView>
     </View>
   );
 };
