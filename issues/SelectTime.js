@@ -11,9 +11,10 @@ const SelectTime = () => {
     const navigation = useNavigation();
 
     const times = [
-        '1-2 hrs',
-        '2-4 hrs',
-        '4-8 hrs'
+        '1-2 hours',
+        '2-4 hours',
+        '4-8 hours',
+        'More than 8 hours'
     ]; // Time options
 
     //to hold the user state
@@ -119,12 +120,13 @@ const Styles = StyleSheet.create({
         marginEnd: 5,
         borderRadius: 20, // Rounded corners
         color: 'black', // Text color
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        width:'60%',
     },
     submitButton: {
         borderRadius: 8,
         paddingVertical: width * 0.03,
-        paddingHorizontal: width * 0.2,
+        paddingHorizontal: width * 0.1,
         alignItems: 'center'
     },
     submitButtonText: {

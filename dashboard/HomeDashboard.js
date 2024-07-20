@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
+import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -9,8 +11,8 @@ const HomeDashboard = () => {
   const theme = useTheme();
   const navigation = useNavigation();
 
-  const navigateToEyeExercise = () => {
-    navigation.navigate('EyeExercise'); // Navigate to the EyeExercise screen
+  const navigateToEyeExercise = (showAllExercises) => {
+    navigation.navigate('EyeExercise', { showAllExercises });
   };
 
   return (
@@ -20,13 +22,13 @@ const HomeDashboard = () => {
 
       <ScrollView>
         <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Eye Exercise</Text>
-        <TouchableOpacity onPress={navigateToEyeExercise}>
+        <TouchableOpacity onPress={() => navigateToEyeExercise(false)}>
           <View style={styles.card}>
             <Image source={require('../assets/dashboardassets/speciallyforyou.jpg')} style={styles.image} />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={navigateToEyeExercise}>
+        <TouchableOpacity onPress={() => navigateToEyeExercise(true)}>
           <View style={styles.card}>
             <Image source={require('../assets/dashboardassets/fulleyeexercise.jpg')} style={styles.image} />
           </View>
@@ -42,6 +44,12 @@ const HomeDashboard = () => {
           <Image source={require('../assets/dashboardassets/focusmode.jpg')} style={styles.image} />
         </View>
       </ScrollView>
+      
+      
+      <View style={styles.bottomNavigationContainer}>
+        <BottomNavigation />
+      </View>
+
     </View>
   );
 };
@@ -75,6 +83,16 @@ const styles = StyleSheet.create({
     height: height * 0.2,
     resizeMode: 'cover',
   },
+
+  bottomNavigationContainer: {
+    alignItems:'center',
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    height: 50, // Adjust height to match BottomNavigation height
+  },
+
 });
 
 export default HomeDashboard;
