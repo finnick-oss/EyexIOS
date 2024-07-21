@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, BackHandler, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Animated, BackHandler, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
 import { useNavigation } from '@react-navigation/native';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
 const CompletedActivity = () => {
   const navigation = useNavigation();
@@ -52,11 +53,24 @@ const CompletedActivity = () => {
   return (
     <View style={styles.container}>
       <Animated.View style={{ ...styles.animationContainer, opacity: fadeAnim }}>
-        <Image source={require('../assets/congo.png')} style={styles.image} />
-        <Text style={styles.congratsText}>Congratulations!</Text>
-        <Text style={styles.completedText}>You have completed today's eye exercise.</Text>
+        <View style={styles.progressContainer}>
+          <AnimatedCircularProgress
+            size={150}
+            width={15}
+            fill={66} // 66% progress
+            tintColor="#1B76BB"
+            backgroundColor="#E0E0E0"
+            rotation={0} // Start from the top
+          >
+            {() => (
+              <Text style={styles.progressText}>2/3</Text>
+            )}
+          </AnimatedCircularProgress>
+        </View>
+        <Text style={styles.completedText}>Exercises completed</Text>
+        <Text style={styles.subText}>You have completed today's eye exercise.</Text>
         <TouchableOpacity onPress={handleDoAgain} style={styles.button}>
-          <Text style={styles.buttonText}>Do Again</Text>
+          <Text style={styles.buttonText}>Do it again</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -73,29 +87,39 @@ const styles = StyleSheet.create({
   animationContainer: {
     alignItems: 'center',
   },
-  image: {
-    width: 100, // Adjust the width as needed
-    height: 100, // Adjust the height as needed
-    marginBottom: 10,
+  progressContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    position: 'relative',
   },
-  congratsText: {
+  progressText: {
+    position: 'absolute',
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 10,
+    textAlign: 'center',
+    width: '100%',
+    top: '42%',
   },
   completedText: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginTop: 20,
+  },
+  subText: {
+    fontSize: 16,
     color: '#FFFFFF',
     textAlign: 'center',
     paddingHorizontal: 20,
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#1B76BB',
     paddingVertical: 10,
     paddingHorizontal: 30,
-    borderRadius: 30,
+    borderRadius: 25,
   },
   buttonText: {
     color: 'white',

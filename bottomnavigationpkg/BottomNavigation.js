@@ -27,7 +27,7 @@ const BottomNavigation = () => {
         <Image source={require('../assets/bottomnavigation/focusmode.png')} style={[styles.iconImage, selectedTab === 'EyeExercise' && styles.selectedIcon]} />
         <Text style={[styles.iconText, selectedTab === 'EyeExercise' && styles.selectedText]}>20-20-20</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigateToScreen('HealthTips')} style={styles.icon}>
+      <TouchableOpacity onPress={() => navigateToScreen('CompletedActivity')} style={styles.icon}>
         <Image source={require('../assets/bottomnavigation/healthtips.png')} style={[styles.iconImage, selectedTab === 'HealthTips' && styles.selectedIcon]} />
         <Text style={[styles.iconText, selectedTab === 'HealthTips' && styles.selectedText]}>Health Tips</Text>
       </TouchableOpacity>
