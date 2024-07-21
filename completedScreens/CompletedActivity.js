@@ -1,13 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, BackHandler, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
 const CompletedActivity = () => {
   const navigation = useNavigation();
   const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity 0
   const soundObject = useRef(new Audio.Sound()).current; // Audio sound object
+  const [progress, setProgress] = useState(0);
+  const maxProgress = 4;
 
   useEffect(() => {
     const backAction = () => {
@@ -34,9 +37,35 @@ const CompletedActivity = () => {
       }).start();
     };
 
-    // Play sound and animate on component mount
+    const loadProgress = async () => {
+      try {
+        const storedProgress = await AsyncStorage.getItem('progress');
+        if (storedProgress !== null) {
+          setProgress(parseInt(storedProgress, 10));
+        }
+      } catch (error) {
+        console.warn('Failed to load progress', error);
+      }
+    };
+
+    const incrementProgress = async () => {
+      try {
+        const storedProgress = await AsyncStorage.getItem('progress');
+        let currentProgress = storedProgress !== null ? parseInt(storedProgress, 10) : 0;
+        if (currentProgress < maxProgress) {
+          currentProgress += 1;
+          await AsyncStorage.setItem('progress', currentProgress.toString());
+          setProgress(currentProgress);
+        }
+      } catch (error) {
+        console.warn('Failed to save progress', error);
+      }
+    };
+
+    // Play sound, animate, and load progress on component mount
     playSound();
     animate();
+    loadProgress().then(() => incrementProgress());
 
     return () => {
       // Clean up audio resources
@@ -50,20 +79,29 @@ const CompletedActivity = () => {
     navigation.navigate('EyeExercise', { showAllExercises: true }); // Navigate to EyeExercise with showAllExercises set to true
   };
 
+  const handleClearProgress = async () => {
+    try {
+      await AsyncStorage.removeItem('progress');
+      setProgress(0); // Reset progress state
+    } catch (error) {
+      console.warn('Failed to clear progress', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Animated.View style={{ ...styles.animationContainer, opacity: fadeAnim }}>
         <View style={styles.progressContainer}>
           <AnimatedCircularProgress
             size={150}
-            width={15}
-            fill={66} // 66% progress
+            width={20}
+            fill={(progress / maxProgress) * 100} // Calculate fill percentage
             tintColor="#1B76BB"
             backgroundColor="#E0E0E0"
             rotation={0} // Start from the top
           >
             {() => (
-              <Text style={styles.progressText}>2/3</Text>
+              <Text style={styles.progressText}>{`${progress}/${maxProgress}`}</Text>
             )}
           </AnimatedCircularProgress>
         </View>
@@ -71,6 +109,9 @@ const CompletedActivity = () => {
         <Text style={styles.subText}>You have completed today's eye exercise.</Text>
         <TouchableOpacity onPress={handleDoAgain} style={styles.button}>
           <Text style={styles.buttonText}>Do it again</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleClearProgress} style={styles.clearButton}>
+          <Text style={styles.buttonText}>Clear Progress</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -117,6 +158,13 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#1B76BB',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    marginBottom: 10, // Add margin between buttons
+  },
+  clearButton: {
+    backgroundColor: '#D9534F', // Red color for clear button
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 25,

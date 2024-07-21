@@ -31,6 +31,8 @@ const theme = {
     gnt_gray: '#808080',
     gnt_outline: '#EDEDED',
     gnt_darkred: '#D30909',
+    gnt_darkgrey :'#363737',
+
   },
 };
 

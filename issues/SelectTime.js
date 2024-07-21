@@ -4,10 +4,10 @@ import { useTheme } from '../themes/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const SelectTime = () => {
-    const theme = useTheme(); //to use the theme
+    const theme = useTheme(); // to use the theme
     const navigation = useNavigation();
 
     const times = [
@@ -17,7 +17,7 @@ const SelectTime = () => {
         'More than 8 hours'
     ]; // Time options
 
-    //to hold the user state
+    // to hold the user state
     const [selectedTime, setSelectedTime] = useState(null);
 
     useEffect(() => {
@@ -70,9 +70,7 @@ const SelectTime = () => {
                                     },
                                     { fontSize: width * 0.04 }
                                 ]}
-                                onPress={() => {
-                                    handleTimePress(item);
-                                }}
+                                onPress={() => handleTimePress(item)}
                             >
                                 {item}
                             </Text>
@@ -85,11 +83,9 @@ const SelectTime = () => {
                 <View style={{ flexWrap: 'wrap', flex: 1, alignItems: 'center' }}>
                     <TouchableOpacity onPress={() => saveSelectedTime(selectedTime)}
                         style={[Styles.submitButton, { backgroundColor: theme.colors.gnt_blue }]}>
-
                         <Text style={[Styles.submitButtonText, { color: theme.colors.gnt_outline }]}>
                             Submit
                         </Text>
-
                     </TouchableOpacity>
                 </View>
             </View>
@@ -121,7 +117,7 @@ const Styles = StyleSheet.create({
         borderRadius: 20, // Rounded corners
         color: 'black', // Text color
         flexWrap: 'wrap',
-        width:'60%',
+        width: '60%',
     },
     submitButton: {
         borderRadius: 8,

@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, Alert, PermissionsAndroid } from 'react-native';
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FocusMode = () => {
   const navigation = useNavigation();
   const [timerStarted, setTimerStarted] = useState(false); // State to track if timer is started
   const [showInfoDialog, setShowInfoDialog] = useState(false); // State to manage info dialog visibility
+  const [permissionGranted, setPermissionGranted] = useState(null); // State to track permission status
+
+  useEffect(() => {
+    // Check and update the permission status on component mount
+    const checkPermissionStatus = async () => {
+      try {
+        const permissionStatus = await AsyncStorage.getItem('notificationPermission');
+        if (permissionStatus !== null) {
+          setPermissionGranted(JSON.parse(permissionStatus));
+        } else {
+          setPermissionGranted(false);
+        }
+      } catch (error) {
+        console.error('Error retrieving permission status:', error);
+      }
+    };
+
+    checkPermissionStatus();
+  }, []);
 
   const navigateToEyeExercise = (showAllExercises) => {
     navigation.navigate('EyeExercise', { showAllExercises });
@@ -17,24 +37,69 @@ const FocusMode = () => {
       console.log('Please start the timer first.');
       return;
     }
-    // Navigate to EyeExercise with showAllExercises set to false
     navigateToEyeExercise(false);
     console.log('Starting exercise...');
   };
 
   const toggleInfo = () => {
-    // Functionality to toggle information display
-    console.log('Toggling info...');
     setShowInfoDialog(!showInfoDialog); // Toggle info dialog visibility
   };
 
-  const toggleTimer = () => {
-    setTimerStarted(!timerStarted);
-    // Additional functionality to start or pause the timer
+  const requestNotificationPermissions = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        {
+          title: 'Notification Permission',
+          message: 'You need to allow notifications to get reminders.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Notification permission granted.');
+        await AsyncStorage.setItem('notificationPermission', JSON.stringify(true));
+        setPermissionGranted(true);
+        return true;
+      } else {
+        console.log('Notification permission denied.');
+        Alert.alert(
+          'Notification Permission',
+          'You need to allow notifications to get reminders.',
+          [{ text: 'OK' }]
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error('Error requesting notification permissions:', error);
+      Alert.alert(
+        'Notification Error',
+        'An error occurred while requesting notification permissions.',
+        [{ text: 'OK' }]
+      );
+      return false;
+    }
+  };
+
+  const toggleTimer = async () => {
     if (!timerStarted) {
       console.log('Starting timer...');
+      
+      // Request permission only if it is not granted yet
+      if (permissionGranted === null || permissionGranted === false) {
+        const permissionStatus = await requestNotificationPermissions();
+        if (permissionStatus) {
+          setTimerStarted(true);
+        }
+      } else if (permissionGranted) {
+        // If permission is already granted
+        setTimerStarted(true);
+      }
     } else {
       console.log('Pausing timer...');
+      setTimerStarted(false);
     }
   };
 

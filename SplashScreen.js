@@ -2,14 +2,15 @@ import React, { useEffect } from 'react';
 import { View, Image, StyleSheet, ToastAndroid, Text } from 'react-native';
 import { useTheme } from './themes/ThemeContext';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation(); // Use useNavigation hook to get navigation object
 
   const showToast = () => {
-    ToastAndroid.show('Splash screen activity', ToastAndroid.SHORT);
-  }
+    ToastAndroid.show('Already selected data', ToastAndroid.SHORT);
+  };
 
   useEffect(() => {
     // Simulate some initialization tasks or network requests
@@ -17,10 +18,19 @@ const SplashScreen = () => {
       // Example: Wait for 2 seconds
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Once initialization is done, navigate to the SelectIssue screen
-      navigation.navigate('SelectIssue'); // Navigate to SelectIssue screen
+      // Check if both the issue and time are saved
+      const issue = await AsyncStorage.getItem('selectedIssue');
+      const time = await AsyncStorage.getItem('selectedTime');
 
-      showToast();
+      // Navigate based on the existence of both values
+      if (issue && time) {
+        navigation.navigate('HomeDashboard'); // Navigate to HomeDashboard if both values exist
+        showToast();
+      } else {
+        navigation.navigate('SelectIssue'); // Navigate to SelectIssue if either value is missing
+      }
+
+      
     };
 
     initializeApp();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ToastAndroid, FlatList, TouchableOpacity, BackHandler, Dimensions, ActivityIndicator, Alert } from 'react-native';
-import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../firebase/firebaseConfig'; // Assuming your firebaseConfig.js is in the same directory
 import NetInfo from '@react-native-community/netinfo';
 import { useTheme } from '../themes/ThemeContext';
@@ -15,21 +15,6 @@ const SelectIssue = () => {
     const theme = useTheme(); // to use the theme
     const navigation = useNavigation();
 
-    // const issues = [
-    //     'myopia',
-    //     'dry eye',
-    //     'lazy eye',
-    //     'eye pain',
-    //     'dark circles',
-    //     'tired eyes',
-    //     'improve vision',
-    //     'double vision',
-    //     'gaming use'
-    // ];  // to upload the issue
-
-    // // to hold the user state
-    // const [index, setIndex] = useState(0);
-    
     const [fetchedIssues, setFetchedIssues] = useState([]);
     const [selectedIssue, setSelectedIssue] = useState(null);
     const [loading, setLoading] = useState(true); // Loading state
@@ -60,18 +45,6 @@ const SelectIssue = () => {
         }
     };
 
-    // const uploadIssueToFirebase = async (issue) => {
-    //     const location = 'EyeConditions'; // Collection name
-    //     try {
-    //         const docRef = await addDoc(collection(db, location), {
-    //             name: issue
-    //         });
-    //         console.log('Document written with ID: ', docRef.id);
-    //     } catch (error) {
-    //         console.error('Error adding document: ', error);
-    //     }
-    // };
-
     const fetchIssuesFromFirebase = async () => {
         const location = 'EyeConditions'; // Collection name
         try {
@@ -85,18 +58,12 @@ const SelectIssue = () => {
         }
     };
 
-    // const handleUpload = () => {
-    //     uploadIssueToFirebase(issues[index]);
-    //     setIndex((prevIndex) => (prevIndex + 1) % issues.length);
-    // };
-
     const handleIssuePress = (item) => {
         setSelectedIssue(item);
     };
 
     const saveSelectedIssue = async (item) => {
         if (item != null) {
-            // Save the selected issue to AsyncStorage
             try {
                 await AsyncStorage.setItem('selectedIssue', item);
                 ToastAndroid.show('Issue saved successfully!', ToastAndroid.SHORT);
@@ -105,7 +72,7 @@ const SelectIssue = () => {
                 console.error('Error saving issue:', error);
             }
         } else {
-            ToastAndroid.show('Please select the issue', ToastAndroid.SHORT);
+            ToastAndroid.show('Please select an issue', ToastAndroid.SHORT);
         }
     };
 
@@ -134,9 +101,7 @@ const SelectIssue = () => {
                                         },
                                         { fontSize: width * 0.04 }
                                     ]}
-                                    onPress={() => {
-                                        handleIssuePress(item);
-                                    }}
+                                    onPress={() => handleIssuePress(item)}
                                 >
                                     {item}
                                 </Text>
@@ -150,12 +115,7 @@ const SelectIssue = () => {
                 <View style={{ flexWrap: 'wrap', flex: 1, alignItems: 'center' }}>
                     <TouchableOpacity onPress={() => saveSelectedIssue(selectedIssue)}
                         style={[Styles.submitButton, { backgroundColor: theme.colors.gnt_blue }]}>
-
-                        <Text style={{
-                            color: theme.colors.gnt_outline,
-                            fontSize: width * 0.05
-                        }}>Submit</Text>
-
+                        <Text style={{ color: theme.colors.gnt_outline, fontSize: width * 0.05 }}>Submit</Text>
                     </TouchableOpacity>
                 </View>
             </View>
