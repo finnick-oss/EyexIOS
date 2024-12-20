@@ -1,19 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, StatusBar, ScrollView } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
 import { app } from '../firebase/firebaseConfig'; // Adjust the path if necessary
 import { useTheme } from '../themes/ThemeContext';
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
-import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
 
 const db = getDatabase(app);
 
-
-
 const HealthTips = () => {
-  
   const navigation = useNavigation();
   const [tipsData, setTipsData] = useState([]);
   const theme = useTheme(); // to use the theme
@@ -42,6 +37,10 @@ const HealthTips = () => {
     fetchData();
   }, []);
 
+  const handleSourceLink = (url) => {
+    Linking.openURL(url).catch((err) => console.error('An error occurred while opening the link', err));
+  };
+
   const renderCard = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate('HealthTipsFD', { tipId: item.id })}>
       <View style={[styles.card, { backgroundColor: theme.colors.greyWhite }]}>
@@ -51,60 +50,56 @@ const HealthTips = () => {
           <Text style={[styles.description, { color: theme.colors.gnt_outline }]} numberOfLines={2} ellipsizeMode="tail">
             {item.description}
           </Text>
+          {/* Add source link if available */}
+          {item.source && (
+            <TouchableOpacity onPress={() => handleSourceLink(item.source)}>
+              <Text style={[styles.sourceText, { color: theme.colors.linkColor }]}>Tips source</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </TouchableOpacity>
   );
 
-
   return (
-    <>
-    
-    <View style={[ { backgroundColor: theme.colors.background }]}>
-    <ScrollView>
+    <View style={[{ backgroundColor: theme.colors.background, flex: 1 }]}>
+      {/* Header with increased padding */}
       <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
         <Text style={[styles.headerText, { color: theme.colors.gnt_outline }]}>Health Tips</Text>
       </View>
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <FlatList
-          data={tipsData}
-          renderItem={renderCard}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.contentContainer}
-        />
-      </View>
-      </ScrollView>
-      
+
+      {/* FlatList without overlapping the bottom navigation */}
+      <FlatList
+        data={tipsData}
+        renderItem={renderCard}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.contentContainer}
+      />
+
+      {/* Bottom Navigation */}
       <View style={styles.bottomNavigationContainer}>
         <BottomNavigation />
       </View>
-
-
-      </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   header: {
-    padding: 15,
+    padding: 30, // Increased padding for the header
     paddingLeft: 20,
+    paddingTop: 30, // Added more top padding for the heading
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
   },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
   contentContainer: {
-    paddingBottom: 20,
+    paddingBottom: 90, // Ensure there is enough space for the bottom navigation
   },
   card: {
     marginBottom: 20,
     borderRadius: 10,
-    
   },
   cardImage: {
     width: '100%',
@@ -122,16 +117,19 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
   },
-
+  sourceText: {
+    fontSize: 12,
+    textDecorationLine: 'underline',
+    marginTop: 10,
+  },
   bottomNavigationContainer: {
-    alignItems:'center',
+    alignItems: 'center',
     position: 'absolute',
-    bottom: 20,
+    bottom: 0,
     left: 0,
     right: 0,
     height: 50, // Adjust height to match BottomNavigation height
   },
-
 });
 
 export default HealthTips;

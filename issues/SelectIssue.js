@@ -1,23 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ToastAndroid, FlatList, TouchableOpacity, BackHandler, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    FlatList,
+    TouchableOpacity,
+    BackHandler,
+    Dimensions,
+    ActivityIndicator,
+    Alert,
+} from 'react-native';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { app } from '../firebase/firebaseConfig'; // Assuming your firebaseConfig.js is in the same directory
+import { app } from '../firebase/firebaseConfig';
 import NetInfo from '@react-native-community/netinfo';
 import { useTheme } from '../themes/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
-
 const db = getFirestore(app);
 
 const SelectIssue = () => {
-    const theme = useTheme(); // to use the theme
+    const theme = useTheme();
     const navigation = useNavigation();
 
     const [fetchedIssues, setFetchedIssues] = useState([]);
     const [selectedIssue, setSelectedIssue] = useState(null);
-    const [loading, setLoading] = useState(true); // Loading state
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         checkInternetConnection();
@@ -54,7 +63,7 @@ const SelectIssue = () => {
         } catch (error) {
             console.error('Error fetching issues: ', error);
         } finally {
-            setLoading(false); // Set loading to false once data is fetched
+            setLoading(false);
         }
     };
 
@@ -66,93 +75,111 @@ const SelectIssue = () => {
         if (item != null) {
             try {
                 await AsyncStorage.setItem('selectedIssue', item);
-                ToastAndroid.show('Issue saved successfully!', ToastAndroid.SHORT);
                 navigation.navigate('SelectTime');
             } catch (error) {
                 console.error('Error saving issue:', error);
             }
         } else {
-            ToastAndroid.show('Please select an issue', ToastAndroid.SHORT);
         }
     };
 
     return (
-        <View style={[Styles.maincontainer, { backgroundColor: theme.colors.background }]}>
-            <View style={Styles.fetchedIssuesContainer}>
-                <Text style={{ color: theme.colors.gnt_outline, fontSize: width * 0.05 }}>
-                    Select any one of the options according to your diagnosis/issue.
-                </Text>
-
-                <View style={{ marginTop: 20, marginBottom: 20, flex: 1 }}>
-                    {loading ? (
-                        <View style={Styles.loaderContainer}>
-                            <ActivityIndicator size="large" color={theme.colors.gnt_blue} />
-                        </View>
-                    ) : (
-                        <FlatList
-                            data={fetchedIssues}
-                            renderItem={({ item }) => (
-                                <Text
-                                    style={[
-                                        Styles.issueText,
-                                        selectedIssue === item && {
-                                            backgroundColor: theme.colors.gnt_blue,
-                                            color: theme.colors.white
-                                        },
-                                        { fontSize: width * 0.04 }
-                                    ]}
-                                    onPress={() => handleIssuePress(item)}
-                                >
-                                    {item}
-                                </Text>
-                            )}
-                            numColumns={2} // Display 2 columns in the grid
-                            keyExtractor={(item, index) => index.toString()} // Use index as the key
-                        />
-                    )}
-                </View>
-
-                <View style={{ flexWrap: 'wrap', flex: 1, alignItems: 'center' }}>
-                    <TouchableOpacity onPress={() => saveSelectedIssue(selectedIssue)}
-                        style={[Styles.submitButton, { backgroundColor: theme.colors.gnt_blue }]}>
-                        <Text style={{ color: theme.colors.gnt_outline, fontSize: width * 0.05 }}>Submit</Text>
-                    </TouchableOpacity>
-                </View>
+        <View style={[styles.mainContainer, { backgroundColor: theme.colors.background }]}>
+            <Text style={[styles.headerText, { color: theme.colors.gnt_outline }]}>
+                Select any one of the options according to your diagnosis/issue.
+            </Text>
+    
+            {/* FlatList Container */}
+            <View style={styles.flatListContainer}>
+                {loading ? (
+                    <View style={styles.loaderContainer}>
+                        <ActivityIndicator size="large" color={theme.colors.gnt_blue} />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={fetchedIssues}
+                        renderItem={({ item }) => (
+                            <Text
+                                style={[
+                                    styles.issueText,
+                                    selectedIssue === item && {
+                                        backgroundColor: theme.colors.gnt_blue,
+                                        color: theme.colors.white,
+                                    },
+                                ]}
+                                onPress={() => handleIssuePress(item)}
+                            >
+                                {item}
+                            </Text>
+                        )}
+                        numColumns={2} // Grid layout with 2 columns
+                        keyExtractor={(item, index) => index.toString()}
+                    />
+                )}
+            </View>
+    
+            {/* Button Container */}
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                    onPress={() => saveSelectedIssue(selectedIssue)}
+                    style={[styles.submitButton, { backgroundColor: theme.colors.gnt_blue }]}
+                >
+                    <Text style={[styles.submitButtonText, { color: theme.colors.gnt_outline }]}>
+                        Submit
+                    </Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
+    
 };
 
-const Styles = StyleSheet.create({
-    maincontainer: {
+const styles = StyleSheet.create({
+    mainContainer: {
         flex: 1,
-        padding: width * 0.08,
-        alignItems: 'flex-start',
+        paddingHorizontal: width * 0.05,
+        paddingTop: height * 0.10, // Adjusted padding
     },
-    fetchedIssuesContainer: {
-        marginTop: 20,
-        flex: 1, // Make sure the container takes full height
+    headerText: {
+        fontSize: width * 0.05,
+        textAlign: 'center',
+        marginBottom: height * 0.02, // Space below header
+    },
+    flatListContainer: {
+        flexGrow: 0, // Ensures FlatList takes only the required height
+        marginBottom: height * 0.02, // Space below the FlatList
     },
     loaderContainer: {
-        flex: 1, // Take full height of the parent
+        flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     issueText: {
-        backgroundColor: '#e0e0e0', // Grey background color
+        backgroundColor: '#e0e0e0',
         padding: width * 0.04,
-        marginTop: 5,
-        marginBottom: 5,
-        marginEnd: 5,
-        borderRadius: 20, // Rounded corners
-        color: 'black' // Text color
+        margin: width * 0.02,
+        borderRadius: 20,
+        textAlign: 'center',
+        color: 'black',
+        flex: 1,
     },
+    buttonContainer: {
+        alignItems: 'flex-start', // Align button to the left
+        marginTop: height * 0.01, // Small spacing above the button
+        paddingLeft: width * 0.05, // Optional: Add padding to adjust the left spacing
+    },
+    
     submitButton: {
         borderRadius: 8,
-        paddingVertical: width * 0.02,
+        paddingVertical: height * 0.015,
         paddingHorizontal: width * 0.2,
-        alignItems: 'center'
-    }
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        fontSize: width * 0.05,
+        fontWeight: 'bold',
+    },
 });
+
 
 export default SelectIssue;

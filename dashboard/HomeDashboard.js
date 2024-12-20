@@ -46,6 +46,10 @@ const HomeDashboard = () => {
     navigation.navigate('EyeExercise', { showAllExercises });
   };
 
+  const navigateToOtherTabs = (tab) => {
+    navigation.navigate(tab);
+  };
+
   const getMotivationalQuote = () => {
     const quotes = [
       "Great job! Keep up the good work.",
@@ -115,14 +119,18 @@ const HomeDashboard = () => {
         </TouchableOpacity>
 
         <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Health Tips</Text>
+        <TouchableOpacity onPress={() => navigateToOtherTabs('HealthTips')}>
         <View style={styles.card}>
           <Image source={require('../assets/dashboardassets/healthtips.jpg')} style={styles.image} />
         </View>
+        </TouchableOpacity>
 
         <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Focus Mode</Text>
+        <TouchableOpacity onPress={() => navigateToOtherTabs('FocusMode')}>
         <View style={styles.card}>
           <Image source={require('../assets/dashboardassets/focusmode.jpg')} style={styles.image} />
         </View>
+        </TouchableOpacity>
       </ScrollView>
 
       <View style={styles.bottomNavigationContainer}>
@@ -136,6 +144,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: width * 0.05,
+    paddingTop:height*0.08,
   },
 
   cardScrollView: {

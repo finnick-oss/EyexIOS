@@ -2,27 +2,37 @@
   "expo": {
     "name": "EyeX",
     "slug": "EyeX",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/applogo.jpg",  
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/applogo.jpg",  
+      "resizeMode": "contain",  
+      "backgroundColor": "#ffffff"  
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anvelopers.EyeX",
+      "buildNumber": "1.0.2",
+      "infoPlist": {
+        "NSPushNotificationsUsageDescription": false,
+        "NSAppUsesNonExemptEncryption": true
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/applogo.jpg",  
+        "backgroundColor": "#ffffff"  
       },
-      "package": "com.anuragbhatt.EyeX"
+      "package": "com.anvelopers.EyeX",
+      "permissions": [
+        "NOTIFICATIONS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

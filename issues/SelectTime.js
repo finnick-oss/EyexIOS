@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ToastAndroid, FlatList, TouchableOpacity, BackHandler, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, BackHandler, Dimensions } from 'react-native';
 import { useTheme } from '../themes/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const SelectTime = () => {
     const theme = useTheme(); // to use the theme
@@ -40,14 +40,12 @@ const SelectTime = () => {
             // Save the selected time to AsyncStorage
             try {
                 await AsyncStorage.setItem('selectedTime', item);
-                ToastAndroid.show('Time saved successfully!', ToastAndroid.SHORT);
-                navigation.navigate('LoadData'); // Change to the actual next screen
+               navigation.navigate('LoadData'); // Change to the actual next screen
             } catch (error) {
                 console.error('Error saving time:', error);
             }
         } else {
-            ToastAndroid.show('Please select the time', ToastAndroid.SHORT);
-        }
+             }
     };
 
     return (
@@ -98,6 +96,7 @@ const Styles = StyleSheet.create({
         flex: 1,
         padding: width * 0.08,
         alignItems: 'flex-start',
+        paddingTop: height * 0.10, 
     },
     timesContainer: {
         marginTop: 20,

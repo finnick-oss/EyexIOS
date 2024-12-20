@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Image, StyleSheet, ToastAndroid, Text } from 'react-native';
+import { View, Image, StyleSheet, Text } from 'react-native';
 import { useTheme } from './themes/ThemeContext';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,9 +8,7 @@ const SplashScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation(); // Use useNavigation hook to get navigation object
 
-  const showToast = () => {
-    ToastAndroid.show('Already selected data', ToastAndroid.SHORT);
-  };
+
 
   useEffect(() => {
     // Simulate some initialization tasks or network requests
