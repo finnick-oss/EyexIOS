@@ -5,6 +5,8 @@ PODS:
   - DoubleConversion (1.1.6)
   - EASClient (0.13.1):
     - ExpoModulesCore
+  - EXApplication (6.0.1):
+    - ExpoModulesCore
   - EXAV (15.0.1):
     - ExpoModulesCore
     - ReactCommon/turbomodule/core
@@ -12,6 +14,8 @@ PODS:
     - ExpoModulesCore
   - EXJSONUtils (0.14.0)
   - EXManifests (0.15.4):
+    - ExpoModulesCore
+  - EXNotifications (0.29.11):
     - ExpoModulesCore
   - Expo (52.0.20):
     - ExpoModulesCore
@@ -1332,9 +1336,13 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-blob-util (0.21.2):
+    - React-Core
   - react-native-netinfo (11.4.1):
     - React-Core
   - react-native-notifications (5.1.0):
+    - React-Core
+  - react-native-pdf (6.7.6):
     - React-Core
   - react-native-safe-area-context (5.0.0):
     - React-Core
@@ -1613,6 +1621,29 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
+  - RNGestureHandler (2.21.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNPermissions (5.2.1):
+    - React-Core
   - RNReanimated (3.16.6):
     - DoubleConversion
     - glog
@@ -1768,10 +1799,12 @@ DEPENDENCIES:
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EASClient (from `../node_modules/expo-eas-client/ios`)
+  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXAV (from `../node_modules/expo-av/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
   - EXManifests (from `../node_modules/expo-manifests/ios`)
+  - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
@@ -1817,8 +1850,10 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - react-native-blob-util (from `../node_modules/react-native-blob-util`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
+  - react-native-pdf (from `../node_modules/react-native-pdf`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -1850,6 +1885,8 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCPushNotificationIOS (from `../node_modules/@react-native-community/push-notification-ios`)"
   - RNFastImage (from `../node_modules/react-native-fast-image`)
+  - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSnackbar (from `../node_modules/react-native-snackbar`)
@@ -1876,6 +1913,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EASClient:
     :path: "../node_modules/expo-eas-client/ios"
+  EXApplication:
+    :path: "../node_modules/expo-application/ios"
   EXAV:
     :path: "../node_modules/expo-av/ios"
   EXConstants:
@@ -1884,6 +1923,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-json-utils/ios"
   EXManifests:
     :path: "../node_modules/expo-manifests/ios"
+  EXNotifications:
+    :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
   ExpoAsset:
@@ -1971,10 +2012,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-blob-util:
+    :path: "../node_modules/react-native-blob-util"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-notifications:
     :path: "../node_modules/react-native-notifications"
+  react-native-pdf:
+    :path: "../node_modules/react-native-pdf"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   React-nativeconfig:
@@ -2037,6 +2082,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/push-notification-ios"
   RNFastImage:
     :path: "../node_modules/react-native-fast-image"
+  RNGestureHandler:
+    :path: "../node_modules/react-native-gesture-handler"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2059,10 +2108,12 @@ SPEC CHECKSUMS:
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EASClient: 720af5473430a688e792ffa91f33d11fe72fcb89
+  EXApplication: e1ad9c950c98b2b134578092c948b10b403f3ea7
   EXAV: 9773c9799767c9925547b05e41a26a0240bb8ef2
   EXConstants: dd2fe64c6cdb1383b694c309a63028a8e9f2be6d
   EXJSONUtils: 01fc7492b66c234e395dcffdd5f53439c5c29c93
   EXManifests: f30a0c5d3d6cad8db9c01bab579e0aa0df5d3cb2
+  EXNotifications: e27ed9ad086026ef0cdd5ddbf9be60abd18232c8
   Expo: f39be4210805cf1fdd2eba47cb43f743fb420e09
   ExpoAsset: 8138f2a9ec55ae1ad7c3871448379f7d97692d15
   ExpoFileSystem: 179a0661fd6d3c4e5d7e500a99a9cd8b295d9566
@@ -2108,8 +2159,10 @@ SPEC CHECKSUMS:
   React-logger: 697873f06b8ba436e3cddf28018ab4741e8071b6
   React-Mapbuffer: c174e11bdea12dce07df8669d6c0dc97eb0c7706
   React-microtasksnativemodule: 4c4eb6c6b6a33765ca9242e4efffb249700ea0df
+  react-native-blob-util: 64a732c0b8bb7f4928905e16ea8dc5cde6fb4832
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
+  react-native-pdf: 70ec85fc764070ce9324f5aea504795e889e6ba0
   react-native-safe-area-context: ab7beb734b0f9f79f55ae144a6c946a6422f55d6
   React-nativeconfig: f7ab6c152e780b99a8c17448f2d99cf5f69a2311
   React-NativeModulesApple: 70600f7edfc2c2a01e39ab13a20fd59f4c60df0b
@@ -2141,6 +2194,8 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
   RNCPushNotificationIOS: 64218f3c776c03d7408284a819b2abfda1834bc8
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
+  RNGestureHandler: aa9690789023c9be8f06aa90e10ce637ea788f4d
+  RNPermissions: bd4e8932db57d658a7fd0395bc0ea8a344e28405
   RNReanimated: ac21443586c889b6eae9e50d9011ced1a64eb548
   RNScreens: e6f9bc3a41be76af2ba0a815ea299a0000b1c838
   RNSnackbar: 37ce6daf19c8bd35cf6133db5797aa298c8782ac

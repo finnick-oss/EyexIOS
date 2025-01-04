@@ -13,6 +13,7 @@ import FocusMode from './202020rule/FocusMode';
 import CompletedActivity from './completedScreens/CompletedActivity';
 import HealthTips from './tips/HealthTips';
 import HealthTipsFD from './tips/HealthTipsFD';
+import DietPlan from './dietplan/DietPlan';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +39,7 @@ const App = () => {
   }} />
           <Stack.Screen name="HealthTips" component={HealthTips} />
           <Stack.Screen name="HealthTipsFD" component={HealthTipsFD} />
+          <Stack.Screen name="DietPlan" component={DietPlan} />
         </Stack.Navigator>
       </NavigationContainer></GluestackUIProvider>
   );

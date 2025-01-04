@@ -4,13 +4,13 @@
     "slug": "EyeX",
     "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/applogo.jpg",  
+    "icon": "./assets/applogo.jpg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/applogo.jpg",  
-      "resizeMode": "contain",  
-      "backgroundColor": "#ffffff"  
+      "image": "./assets/applogo.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -26,8 +26,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/applogo.jpg",  
-        "backgroundColor": "#ffffff"  
+        "foregroundImage": "./assets/applogo.jpg",
+        "backgroundColor": "#ffffff"
       },
       "package": "com.anvelopers.EyeX",
       "permissions": [
@@ -41,6 +41,9 @@
       "eas": {
         "projectId": "696fb054-08a8-4cc2-8206-3990939f5b34"
       }
-    }
+    },
+    "plugins": [
+      "expo-asset"
+    ]
   }
 }

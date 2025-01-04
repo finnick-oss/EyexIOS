@@ -131,6 +131,18 @@ const HomeDashboard = () => {
           <Image source={require('../assets/dashboardassets/focusmode.jpg')} style={styles.image} />
         </View>
         </TouchableOpacity>
+
+        <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Diet Plan</Text>
+<View style={styles.card}>
+  <Image source={require('../assets/dashboardassets/dietplan.jpg')} style={styles.image} />
+  {/* Show Diet Plan Button */}
+  <TouchableOpacity style={styles.showDietButton} onPress={() => {navigateToOtherTabs('DietPlan')}}>
+    <Text style={styles.showDietText}>Show Diet Plan</Text>
+  </TouchableOpacity>
+</View>
+
+
+
       </ScrollView>
 
       <View style={styles.bottomNavigationContainer}>
@@ -144,7 +156,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: width * 0.05,
-    paddingTop:height*0.08,
+    paddingTop: height * 0.08,
   },
 
   cardScrollView: {
@@ -171,7 +183,7 @@ const styles = StyleSheet.create({
   },
   progressLeft: {
     flex: 1,
-    marginEnd:5,
+    marginEnd: 5,
   },
   progressRight: {
     flex: 1.6,
@@ -201,6 +213,22 @@ const styles = StyleSheet.create({
     height: height * 0.2,
     resizeMode: 'cover',
   },
+  showDietButton: {
+    position: 'absolute',
+    bottom: 10, // Adjust based on the size of the card
+    left: 10,   // Adjust to position it to the left
+    backgroundColor: 'red', // Set the background color to red
+    borderRadius: 25, // Round the corners
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  showDietText: {
+    color: '#fff',
+    fontSize: width * 0.04,
+    fontWeight: 'bold',
+  },  
   bottomNavigationContainer: {
     alignItems: 'center',
     position: 'absolute',
