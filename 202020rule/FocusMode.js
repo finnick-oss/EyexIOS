@@ -3,13 +3,14 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, Alert, Platform
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications'; // For iOS notifications
+import * as Notifications from 'expo-notifications';
 
 const FocusMode = () => {
   const navigation = useNavigation();
   const [timerStarted, setTimerStarted] = useState(false); // State to track if timer is started
   const [showInfoDialog, setShowInfoDialog] = useState(false); // State to manage info dialog visibility
   const [permissionGranted, setPermissionGranted] = useState(null); // State to track permission status
+  const [timerId, setTimerId] = useState(null); // State to store the timer ID
 
   useEffect(() => {
     // Check and update the permission status on component mount
@@ -28,6 +29,15 @@ const FocusMode = () => {
 
     checkPermissionStatus();
   }, []);
+
+  useEffect(() => {
+    // Clear timer if the component unmounts or the timer is stopped
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+    };
+  }, [timerId]);
 
   const navigateToEyeExercise = (showAllExercises) => {
     navigation.navigate('EyeExercise', { showAllExercises });
@@ -48,24 +58,21 @@ const FocusMode = () => {
 
   const requestNotificationPermissions = async () => {
     if (Platform.OS === 'ios') {
-      // iOS permission request using expo-notifications
       const { status } = await Notifications.requestPermissionsAsync();
       if (status === 'granted') {
         console.log('Notification permission granted.');
-        await AsyncStorage.setItem('notificationPermission', JSON.stringify(true)); // Save permission status
-        setPermissionGranted(true); // Update the state
+        await AsyncStorage.setItem('notificationPermission', JSON.stringify(true));
+        setPermissionGranted(true);
         return true;
       } else {
         console.log('Notification permission denied.');
         Alert.alert(
           'Notification Permission',
           'You need to allow notifications to get reminders.',
-          [
-            { text: 'OK' }
-          ]
+          [{ text: 'OK' }]
         );
-        await AsyncStorage.setItem('notificationPermission', JSON.stringify(false)); // Save permission denial status
-        setPermissionGranted(false); // Update the state
+        await AsyncStorage.setItem('notificationPermission', JSON.stringify(false));
+        setPermissionGranted(false);
         return false;
       }
     }
@@ -75,20 +82,18 @@ const FocusMode = () => {
     if (Platform.OS === 'ios') {
       Linking.openURL('app-settings:');
     } else {
-      Linking.openSettings(); // For Android, open app settings directly
+      Linking.openSettings();
     }
   };
 
   const toggleTimer = async () => {
     if (!timerStarted) {
       console.log('Starting timer...');
-      
-      // Request permission only if it is not granted yet
+
       if (permissionGranted === null) {
-        // If the permission status is still unknown, request permission
         const permissionStatus = await requestNotificationPermissions();
         if (permissionStatus) {
-          setTimerStarted(true); // Start the timer if permission is granted
+          startFiveMinuteTimer();
         } else {
           Alert.alert(
             'Permission Denied',
@@ -100,7 +105,6 @@ const FocusMode = () => {
           );
         }
       } else if (permissionGranted === false) {
-        console.log('Permission denied. Unable to start timer.');
         Alert.alert(
           'Permission Denied',
           'Please allow notifications to start the timer.',
@@ -110,13 +114,39 @@ const FocusMode = () => {
           ]
         );
       } else if (permissionGranted === true) {
-        // If permission is already granted
-        setTimerStarted(true); // Start the timer
+        startFiveMinuteTimer();
       }
     } else {
       console.log('Pausing timer...');
       setTimerStarted(false);
+      if (timerId) {
+        clearTimeout(timerId); // Clear the timer
+      }
     }
+  };
+
+  const startFiveMinuteTimer = () => {
+    setTimerStarted(true);
+
+    // Set a 5-minute timer
+    const timer = setTimeout(() => {
+      triggerNotification(); // Trigger notification after 5 minutes
+      setTimerStarted(false); // Stop the timer
+    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+
+    setTimerId(timer); // Save the timer ID to state
+  };
+
+  const triggerNotification = async () => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Time to Take an Eye Break!',
+        body: 'Do a quick eye workout to keep your eyes healthy.',
+        sound: true,
+      },
+      trigger: null, // Immediately show the notification
+    });
+    console.log('Notification triggered!');
   };
 
   return (
@@ -132,7 +162,7 @@ const FocusMode = () => {
 
         <TouchableOpacity onPress={toggleInfo}>
           <Image
-            source={require('../assets/info.png')} // Replace with your info icon
+            source={require('../assets/info.png')}
             style={styles.infoButton}
           />
         </TouchableOpacity>

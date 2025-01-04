@@ -62,7 +62,7 @@ const HealthTips = () => {
   );
 
   return (
-    <View style={[{ backgroundColor: theme.colors.background, flex: 1 }]}>
+    <View style={[{ backgroundColor: theme.colors.background, flex: 1 , padding:'10'}]}>
       {/* Header with increased padding */}
       <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
         <Text style={[styles.headerText, { color: theme.colors.gnt_outline }]}>Health Tips</Text>

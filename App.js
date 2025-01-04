@@ -27,12 +27,16 @@ const App = () => {
             animation: 'none', // You can choose 'slide_from_right', 'slide_from_left', 'fade', etc.
           }}
         >
-          <Stack.Screen name="SplashScreen" component={SplashScreen} />
+          <Stack.Screen name="SplashScreen" component={SplashScreen} options={{
+    gestureEnabled: false, 
+  }} />
           <Stack.Screen name="SelectIssue" component={SelectIssue} />
           <Stack.Screen name="EyeExercise" component={EyeExercise} />
           <Stack.Screen name="SelectTime" component={SelectTime} />
           <Stack.Screen name="LoadData" component={LoadData} />
-          <Stack.Screen name="HomeDashboard" component={HomeDashboard} />
+          <Stack.Screen name="HomeDashboard" component={HomeDashboard}  options={{
+    gestureEnabled: false, 
+  }}/>
           <Stack.Screen name="FocusMode" component={FocusMode} />
           <Stack.Screen name="CompletedActivity" component={CompletedActivity} options={{
     gestureEnabled: false, 

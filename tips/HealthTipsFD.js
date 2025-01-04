@@ -5,7 +5,6 @@ import { app } from '../firebase/firebaseConfig';
 import { useTheme } from '../themes/ThemeContext';
 import CustomButton from './CustomButton';
 
-
 const db = getDatabase(app);
 
 const HealthTipsFD = ({ route, navigation }) => {
@@ -45,20 +44,27 @@ const HealthTipsFD = ({ route, navigation }) => {
     }
   };
 
+  // Helper to replace '-n' with newlines
+  const formatDescription = (text) => {
+    return text?.replace(/-n/g, '\n');
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {tipData && (
         <>
           <Image source={{ uri: tipData.images }} style={styles.image} />
           <ScrollView>
-          <Text style={[styles.title, { color: theme.colors.gnt_outline }]}>{tipData.title}</Text>
-          <Text style={[styles.fulldescription, { color: theme.colors.gnt_outline }]}>{tipData.Fulldescription}</Text>
+            <Text style={[styles.title, { color: theme.colors.gnt_outline }]}>{tipData.title}</Text>
+            <Text style={[styles.fulldescription, { color: theme.colors.gnt_outline }]}>
+              {formatDescription(tipData.Fulldescription)}
+            </Text>
           </ScrollView>
 
           <View style={styles.buttonContainer}>
             <CustomButton title="Previous" onPress={handlePrevious} disabled={currentTipId === "1"} />
             <CustomButton title="Next" onPress={handleNext} />
-        </View>
+          </View>
         </>
       )}
     </View>
