@@ -33,7 +33,9 @@ const App = () => {
           <Stack.Screen name="LoadData" component={LoadData} />
           <Stack.Screen name="HomeDashboard" component={HomeDashboard} />
           <Stack.Screen name="FocusMode" component={FocusMode} />
-          <Stack.Screen name="CompletedActivity" component={CompletedActivity} />
+          <Stack.Screen name="CompletedActivity" component={CompletedActivity} options={{
+    gestureEnabled: false, 
+  }} />
           <Stack.Screen name="HealthTips" component={HealthTips} />
           <Stack.Screen name="HealthTipsFD" component={HealthTipsFD} />
         </Stack.Navigator>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, Alert, PermissionsAndroid } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, Alert, Platform, Linking } from 'react-native';
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications'; // For iOS notifications
 
 const FocusMode = () => {
   const navigation = useNavigation();
@@ -16,9 +17,9 @@ const FocusMode = () => {
       try {
         const permissionStatus = await AsyncStorage.getItem('notificationPermission');
         if (permissionStatus !== null) {
-          setPermissionGranted(JSON.parse(permissionStatus));
+          setPermissionGranted(JSON.parse(permissionStatus)); // Set state based on saved permission status
         } else {
-          setPermissionGranted(false);
+          setPermissionGranted(false); // Default state if no status found
         }
       } catch (error) {
         console.error('Error retrieving permission status:', error);
@@ -46,40 +47,35 @@ const FocusMode = () => {
   };
 
   const requestNotificationPermissions = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-        {
-          title: 'Notification Permission',
-          message: 'You need to allow notifications to get reminders.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+    if (Platform.OS === 'ios') {
+      // iOS permission request using expo-notifications
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status === 'granted') {
         console.log('Notification permission granted.');
-        await AsyncStorage.setItem('notificationPermission', JSON.stringify(true));
-        setPermissionGranted(true);
+        await AsyncStorage.setItem('notificationPermission', JSON.stringify(true)); // Save permission status
+        setPermissionGranted(true); // Update the state
         return true;
       } else {
         console.log('Notification permission denied.');
         Alert.alert(
           'Notification Permission',
           'You need to allow notifications to get reminders.',
-          [{ text: 'OK' }]
+          [
+            { text: 'OK' }
+          ]
         );
+        await AsyncStorage.setItem('notificationPermission', JSON.stringify(false)); // Save permission denial status
+        setPermissionGranted(false); // Update the state
         return false;
       }
-    } catch (error) {
-      console.error('Error requesting notification permissions:', error);
-      Alert.alert(
-        'Notification Error',
-        'An error occurred while requesting notification permissions.',
-        [{ text: 'OK' }]
-      );
-      return false;
+    }
+  };
+
+  const openSettings = () => {
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else {
+      Linking.openSettings(); // For Android, open app settings directly
     }
   };
 
@@ -88,14 +84,34 @@ const FocusMode = () => {
       console.log('Starting timer...');
       
       // Request permission only if it is not granted yet
-      if (permissionGranted === null || permissionGranted === false) {
+      if (permissionGranted === null) {
+        // If the permission status is still unknown, request permission
         const permissionStatus = await requestNotificationPermissions();
         if (permissionStatus) {
-          setTimerStarted(true);
+          setTimerStarted(true); // Start the timer if permission is granted
+        } else {
+          Alert.alert(
+            'Permission Denied',
+            'Please allow notifications to start the timer.',
+            [
+              { text: 'Retry', onPress: requestNotificationPermissions },
+              { text: 'Open Settings', onPress: openSettings },
+            ]
+          );
         }
-      } else if (permissionGranted) {
+      } else if (permissionGranted === false) {
+        console.log('Permission denied. Unable to start timer.');
+        Alert.alert(
+          'Permission Denied',
+          'Please allow notifications to start the timer.',
+          [
+            { text: 'Retry', onPress: requestNotificationPermissions },
+            { text: 'Open Settings', onPress: openSettings },
+          ]
+        );
+      } else if (permissionGranted === true) {
         // If permission is already granted
-        setTimerStarted(true);
+        setTimerStarted(true); // Start the timer
       }
     } else {
       console.log('Pausing timer...');
@@ -236,7 +252,7 @@ const styles = StyleSheet.create({
   exerciseInfoText: {
     fontSize: 18,
     textAlign: 'center',
-    color: '#EDEDED', // Adjust text color as needed
+    color: '#EDEDED', // Adjust text color
   },
   bottomNavigationContainer: {
     alignItems: 'center',
@@ -253,9 +269,8 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    margin: 20,
-    backgroundColor: '#36454F',
-    borderRadius: 10,
+    backgroundColor: 'white',
+    borderRadius: 20,
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
@@ -264,25 +279,22 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
     elevation: 5,
   },
   modalText: {
+    fontSize: 16,
     marginBottom: 15,
     textAlign: 'center',
-    color: '#EDEDED',
   },
   closeButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#2196F3',
     borderRadius: 20,
-    paddingStart: 30,
-    paddingEnd: 30,
     padding: 10,
     elevation: 2,
-    marginTop: 10,
   },
   closeButtonText: {
-    color: '#FFFFFF',
+    color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
   },

@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   bottomNavigationContainer: {
     alignItems: 'center',
     position: 'absolute',
-    bottom: 0,
+    bottom: 20,
     left: 0,
     right: 0,
     height: 50, // Adjust height to match BottomNavigation height

@@ -4,6 +4,7 @@ import { Audio } from 'expo-av';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for back arrow
 
 const CompletedActivity = () => {
   const navigation = useNavigation();
@@ -79,17 +80,16 @@ const CompletedActivity = () => {
     navigation.navigate('EyeExercise', { showAllExercises: true }); // Navigate to EyeExercise with showAllExercises set to true
   };
 
-  const handleClearProgress = async () => {
-    try {
-      await AsyncStorage.removeItem('progress');
-      setProgress(0); // Reset progress state
-    } catch (error) {
-      console.warn('Failed to clear progress', error);
-    }
-  };
-
   return (
     <View style={styles.container}>
+      {/* Back arrow */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate('HomeDashboard')}
+      >
+        <Icon name="arrow-back" size={28} color="#FFFFFF" />
+      </TouchableOpacity>
+
       <Animated.View style={{ ...styles.animationContainer, opacity: fadeAnim }}>
         <View style={styles.progressContainer}>
           <AnimatedCircularProgress
@@ -110,9 +110,6 @@ const CompletedActivity = () => {
         <TouchableOpacity onPress={handleDoAgain} style={styles.button}>
           <Text style={styles.buttonText}>Do it again</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleClearProgress} style={styles.clearButton}>
-          <Text style={styles.buttonText}>Clear Progress</Text>
-        </TouchableOpacity>
       </Animated.View>
     </View>
   );
@@ -124,6 +121,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#1E1D1D', // Adjust background color as needed
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60, // Add margin from the top
+    left: 20, // Add margin from the left
+    zIndex: 10, // Ensure the button is on top
   },
   animationContainer: {
     alignItems: 'center',
@@ -144,7 +147,7 @@ const styles = StyleSheet.create({
     top: '42%',
   },
   completedText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginTop: 20,
@@ -158,16 +161,10 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#1B76BB',
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 35,
     borderRadius: 25,
-    marginBottom: 10, // Add margin between buttons
-  },
-  clearButton: {
-    backgroundColor: '#D9534F', // Red color for clear button
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 25,
+    marginTop: 20,
   },
   buttonText: {
     color: 'white',

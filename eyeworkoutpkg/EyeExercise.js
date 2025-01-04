@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ProgressBarAndroid, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, BackHandler } from 'react-native';
+import * as Progress from 'react-native-progress';
 import { Audio } from 'expo-av';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 const EyeExercise = () => {
     const route = useRoute();
@@ -21,7 +23,6 @@ const EyeExercise = () => {
         { name: "PUSH AGAINST YOUR TEMPLE", gif: require('../gif/normal/gif10.gif'), audio: require('../assets/raw/audio10.mp3') },
         { name: "DRAW A TRIANGLE", gif: require('../gif/normal/gif11.gif'), audio: require('../assets/raw/audio11.mp3') },
         { name: "DRAW A RECTANGLE", gif: require('../gif/normal/gif12.gif'), audio: require('../assets/raw/audio12.mp3') },
-        // Add more exercises as needed
     ];
 
     const getRandomExercises = (allExercises, numberOfExercises) => {
@@ -43,21 +44,23 @@ const EyeExercise = () => {
 
     useEffect(() => {
         const backAction = async () => {
-            if (sound) {
-                await sound.stopAsync();
-                await sound.unloadAsync();
-            }
+            await stopAndUnloadSound();
             navigation.goBack();
             return true;
         };
-    
+
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    
-        return () => {
-            backHandler.remove();
-        };
+
+        return () => backHandler.remove();
     }, [navigation, sound]);
-    
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', async () => {
+            await stopAndUnloadSound();
+        });
+
+        return unsubscribe;
+    }, [navigation, sound]);
 
     useEffect(() => {
         let interval = null;
@@ -71,20 +74,19 @@ const EyeExercise = () => {
                 }
             }, 1000);
         }
-
         return () => clearInterval(interval);
     }, [timer, isPaused]);
 
     useEffect(() => {
         loadAndPlaySound();
-        return () => unloadSound();
+        return () => stopAndUnloadSound();
     }, [currentExerciseIndex, selectedExercises]);
 
     useEffect(() => {
-        if (currentExerciseIndex === selectedExercises.length - 1 && timer === 1) {
-            setIsCompleted(true);
+        if (isCompleted) {
+            navigation.navigate('CompletedActivity');
         }
-    }, [currentExerciseIndex, selectedExercises, timer]);
+    }, [isCompleted]);
 
     const loadAndPlaySound = async () => {
         if (sound) {
@@ -95,25 +97,21 @@ const EyeExercise = () => {
         await newSound.playAsync();
     };
 
-    const unloadSound = async () => {
+    const stopAndUnloadSound = async () => {
         if (sound) {
+            await sound.stopAsync();
             await sound.unloadAsync();
         }
     };
 
     const handleBackPress = async () => {
-        
-        if (sound) {
-            await sound.stopAsync();
-            await sound.unloadAsync();
-        }
+        await stopAndUnloadSound();
         navigation.goBack();
     };
 
     const handlePreviousExercise = async () => {
         if (currentExerciseIndex > 0) {
-            await sound.stopAsync();
-            await sound.unloadAsync();
+            await stopAndUnloadSound();
             setCurrentExerciseIndex(currentExerciseIndex - 1);
             setTimer(30);
         }
@@ -121,8 +119,7 @@ const EyeExercise = () => {
 
     const handleNextExercise = async () => {
         if (currentExerciseIndex < selectedExercises.length - 1) {
-            await sound.stopAsync();
-            await sound.unloadAsync();
+            await stopAndUnloadSound();
             setCurrentExerciseIndex(currentExerciseIndex + 1);
             setTimer(30);
         } else {
@@ -147,58 +144,71 @@ const EyeExercise = () => {
         return `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
     };
 
-    useEffect(() => {
-        if (isCompleted) {
-            navigation.navigate('CompletedActivity');
-        }
-    }, [isCompleted]);
-
     return (
-        <View style={styles.container}>
-            {selectedExercises.length > 0 && (
-                <>
-                    <Image
-                        source={selectedExercises[currentExerciseIndex].gif}
-                        style={styles.gif}
-                        resizeMode="contain"
-                    />
+<View style={styles.container}>
+    <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={30} color="white" />
+    </TouchableOpacity>
 
-                    <ProgressBarAndroid
-                        styleAttr="Horizontal"
-                        indeterminate={false}
+    {selectedExercises.length > 0 && (
+        <>
+            <Image
+                source={selectedExercises[currentExerciseIndex].gif}
+                style={styles.gif}
+                resizeMode="contain"
+            />
+                    <Progress.Bar
                         progress={(currentExerciseIndex + 1) / selectedExercises.length}
+                        width={null} // Full width
                         color="#007bff"
+                        borderColor="#ddd"
+                        height={10}
                         style={styles.progressBar}
                     />
 
-                    <Text style={styles.title}>{selectedExercises[currentExerciseIndex].name}</Text>
-                    <View style={styles.timerContainer}>
-                        <Text style={styles.timerText}>{formatTime(timer)}</Text>
-                    </View>
+            <Text style={styles.title}>{selectedExercises[currentExerciseIndex].name}</Text>
+            <View style={styles.timerContainer}>
+                <Text style={styles.timerText}>{formatTime(timer)}</Text>
+            </View>
 
-                    <TouchableOpacity onPress={handlePauseResume} style={styles.pauseButton}>
-                        <Text style={styles.pauseButtonText}>{isPaused ? 'Continue' : 'Pause'}</Text>
-                    </TouchableOpacity>
+            <TouchableOpacity onPress={handlePauseResume} style={styles.pauseButton}>
+                <Text style={styles.pauseButtonText}>{isPaused ? 'Continue' : 'Pause'}</Text>
+            </TouchableOpacity>
 
-                    <View style={styles.buttonsContainer}>
-                        <TouchableOpacity 
-                            onPress={handlePreviousExercise} 
-                            style={[styles.navButton, currentExerciseIndex === 0 && styles.disabledButton]}
-                            disabled={currentExerciseIndex === 0}
-                        >
-                            <Text style={styles.navButtonText}>Previous</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            onPress={handleNextExercise} 
-                            style={[styles.navButton, currentExerciseIndex === selectedExercises.length - 1 && styles.disabledButton]}
-                            disabled={currentExerciseIndex === selectedExercises.length - 1}
-                        >
-                            <Text style={styles.navButtonText}>Skip</Text>
-                        </TouchableOpacity>
-                    </View>
-                </>
-            )}
-        </View>
+            {/* Skip and Previous Buttons at the Bottom */}
+            <View style={styles.bottomButtonsContainer}>
+                <TouchableOpacity
+                    onPress={handlePreviousExercise}
+                    disabled={currentExerciseIndex === 0}
+                >
+                    <Text
+                        style={[
+                            styles.textButton,
+                            currentExerciseIndex === 0 && styles.disabledText,
+                        ]}
+                    >
+                        Previous
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={handleNextExercise}
+                    disabled={currentExerciseIndex === selectedExercises.length - 1}
+                >
+                    <Text
+                        style={[
+                            styles.textButton,
+                            currentExerciseIndex === selectedExercises.length - 1 &&
+                                styles.disabledText,
+                        ]}
+                    >
+                        Skip
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </>
+    )}
+</View>
+
     );
 };
 
@@ -206,8 +216,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center', // Center content vertically and horizontally
-        backgroundColor: '#292929'
+        backgroundColor: '#292929',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 10,
     },
     title: {
         fontSize: 22,
@@ -241,30 +256,26 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         width: '100%',
-        height: 20,
+        height: 10,
         marginBottom: 20,
     },
-    buttonsContainer: {
+    bottomButtonsContainer: {
         position: 'absolute',
-        bottom: 20, // Adjust this value as needed to place the buttons at the desired distance from the bottom
+        bottom: 30,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 10, // Add horizontal padding for better spacing
+        width: '80%',
     },
-    navButton: {
-        backgroundColor: 'transparent',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-    },
-    navButtonText: {
+    textButton: {
+        fontSize: 18,
+        fontWeight: 'bold',
         color: 'white',
-        fontSize: 16,
     },
-    disabledButton: {
-        opacity: 0.5,
-    }
+    disabledText: {
+        color: 'gray',
+    },
 });
+
+
 
 export default EyeExercise;
