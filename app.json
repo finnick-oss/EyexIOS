@@ -20,8 +20,16 @@
       "bundleIdentifier": "com.anvelopers.EyeX",
       "buildNumber": "1.0.2",
       "infoPlist": {
-        "NSPushNotificationsUsageDescription": false,
-        "NSAppUsesNonExemptEncryption": true
+        "NSPushNotificationsUsageDescription": "We need to send you reminders for eye exercises to keep your eyes healthy",
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification"
+        ],
+        "NSAppUsesNonExemptEncryption": true,
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "BACKGROUND_NOTIFICATION_TASK"
+        ],
+        "UIRequiresPersistentWiFi": true
       }
     },
     "android": {
@@ -31,8 +39,14 @@
       },
       "package": "com.anvelopers.EyeX",
       "permissions": [
-        "NOTIFICATIONS"
-      ]
+        "NOTIFICATIONS",
+        "BACKGROUND_FETCH",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "FOREGROUND_SERVICE"
+      ],
+      "useNextNotificationsApi": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -43,7 +57,19 @@
       }
     },
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/notification-sound.wav"],
+          "mode": "production",
+          "iosDisplayInForeground": true,
+          "iosHideInForeground": false
+        }
+      ],
+      "expo-background-fetch"
     ]
   }
 }

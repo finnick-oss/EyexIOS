@@ -1,24 +1,192 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, Alert, Platform, Linking } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, Alert, Platform, Linking, AppState } from 'react-native';
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
+import * as BackgroundFetch from 'expo-background-fetch';
+import * as TaskManager from 'expo-task-manager';
 
+const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND_NOTIFICATION_TASK';
+const TIMER_STATE_KEY = '@timer_state';
+
+// Update notification handler for iOS
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
-    shouldSetBadge: false,
+    shouldSetBadge: true,
+    priority: 'high',
   }),
 });
 
+// Register the background task
+TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
+  try {
+    const timerState = await AsyncStorage.getItem(TIMER_STATE_KEY);
+    console.log('Background task checking timer state:', timerState);
+    
+    if (timerState !== 'running') {
+      console.log('Timer not running, cancelling background task');
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      return BackgroundFetch.BackgroundFetchResult.NoData;
+    }
+
+    await triggerNotification();
+    return BackgroundFetch.BackgroundFetchResult.NewData;
+  } catch (error) {
+    console.error('Background task error:', error);
+    return BackgroundFetch.BackgroundFetchResult.Failed;
+  }
+});
+
+const triggerNotification = async () => {
+  try {
+    const timerState = await AsyncStorage.getItem(TIMER_STATE_KEY);
+    if (timerState !== 'running') {
+      console.log('Timer not running, skipping notification');
+      return;
+    }
+
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Notification permission not granted');
+      return;
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Time to Take an Eye Break!',
+        body: 'Do a quick eye workout to keep your eyes healthy.',
+        sound: true,
+        priority: 'high',
+        badge: 1,
+      },
+      trigger: null,
+    });
+    console.log('Notification triggered!');
+  } catch (error) {
+    console.error('Error triggering notification:', error);
+  }
+};
+
 const FocusMode = () => {
   const navigation = useNavigation();
-  const [timerStarted, setTimerStarted] = useState(false); // State to track if timer is started
-  const [showInfoDialog, setShowInfoDialog] = useState(false); // State to manage info dialog visibility
-  const [permissionGranted, setPermissionGranted] = useState(null); // State to track permission status
-  const [timerId, setTimerId] = useState(null); // State to store the timer ID
+  const [timerStarted, setTimerStarted] = useState(false);
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(null);
+  const [timerId, setTimerId] = useState(null);
+
+  // Load timer state when component mounts
+  useEffect(() => {
+    loadTimerState();
+    return () => {
+      cleanupTasks();
+    };
+  }, []);
+
+  const loadTimerState = async () => {
+    try {
+      const savedState = await AsyncStorage.getItem(TIMER_STATE_KEY);
+      if (savedState === 'running') {
+        startFiveMinuteTimer(false);
+      }
+    } catch (error) {
+      console.error('Error loading timer state:', error);
+    }
+  };
+
+  const cleanupTasks = async () => {
+    try {
+      // Clear interval
+      if (timerId) {
+        clearInterval(timerId);
+        setTimerId(null);
+      }
+      
+      // Cancel notifications
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      
+      console.log('Cleanup completed');
+    } catch (error) {
+      console.error('Error in cleanup:', error);
+    }
+  };
+
+  const registerBackgroundTask = async () => {
+    try {
+      await BackgroundFetch.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK, {
+        minimumInterval: 3, // 3 seconds for testing
+        stopOnTerminate: false,
+        startOnBoot: true,
+        enableHeadless: true,
+      });
+      console.log('Background task registered');
+    } catch (error) {
+      if (error.message !== 'Task is already registered') {
+        console.log('Task registration failed:', error);
+      }
+    }
+  };
+
+  const startFiveMinuteTimer = async (shouldRegisterTask = true) => {
+    setTimerStarted(true);
+    await AsyncStorage.setItem(TIMER_STATE_KEY, 'running');
+
+    if (shouldRegisterTask) {
+      await registerBackgroundTask();
+    }
+
+    const timer = setInterval(() => {
+      triggerNotification();
+    }, 20*60*1000); // 3 seconds for testing
+
+    setTimerId(timer);
+  };
+
+  const toggleTimer = async () => {
+    if (!timerStarted) {
+      if (permissionGranted === null || permissionGranted === false) {
+        const permissionStatus = await requestNotificationPermissions();
+        if (!permissionStatus) {
+          Alert.alert(
+            'Permission Denied',
+            'Please allow notifications to start the timer.',
+            [
+              { text: 'Retry', onPress: requestNotificationPermissions },
+              { text: 'Open Settings', onPress: openSettings },
+            ]
+          );
+          return;
+        }
+      }
+      // Start timer
+      await AsyncStorage.setItem(TIMER_STATE_KEY, 'running');
+      startFiveMinuteTimer();
+    } else {
+      try {
+        // Stop timer
+        console.log('Stopping timer...');
+        
+        // Clear interval first
+        if (timerId) {
+          clearInterval(timerId);
+          setTimerId(null);
+        }
+
+        // Update state
+        await AsyncStorage.setItem(TIMER_STATE_KEY, 'stopped');
+        setTimerStarted(false);
+        
+        // Cancel all notifications
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        
+        console.log('Timer successfully stopped');
+      } catch (error) {
+        console.error('Error stopping timer:', error);
+      }
+    }
+  };
 
   useEffect(() => {
     // Check and update the permission status on component mount
@@ -37,15 +205,6 @@ const FocusMode = () => {
 
     checkPermissionStatus();
   }, []);
-
-  useEffect(() => {
-    // Clear timer if the component unmounts or the timer is stopped
-    return () => {
-      if (timerId) {
-        clearTimeout(timerId);
-      }
-    };
-  }, [timerId]);
 
   const navigateToEyeExercise = (showAllExercises) => {
     navigation.navigate('EyeExercise', { showAllExercises });
@@ -94,68 +253,27 @@ const FocusMode = () => {
     }
   };
 
-  const toggleTimer = async () => {
-    if (!timerStarted) {
-      console.log('Starting timer...');
-
-      if (permissionGranted === null) {
-        const permissionStatus = await requestNotificationPermissions();
-        if (permissionStatus) {
-          startFiveMinuteTimer();
-        } else {
-          Alert.alert(
-            'Permission Denied',
-            'Please allow notifications to start the timer.',
-            [
-              { text: 'Retry', onPress: requestNotificationPermissions },
-              { text: 'Open Settings', onPress: openSettings },
-            ]
-          );
-        }
-      } else if (permissionGranted === false) {
-        Alert.alert(
-          'Permission Denied',
-          'Please allow notifications to start the timer.',
-          [
-            { text: 'Retry', onPress: requestNotificationPermissions },
-            { text: 'Open Settings', onPress: openSettings },
-          ]
-        );
-      } else if (permissionGranted === true) {
-        startFiveMinuteTimer();
+  // Add this useEffect to handle app state changes
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (nextAppState === 'active') {
+        const timerState = await AsyncStorage.getItem(TIMER_STATE_KEY);
+        console.log('App became active, timer state:', timerState);
+        setTimerStarted(timerState === 'running');
       }
-    } else {
-      console.log('Stopping timer...');
-      setTimerStarted(false);
-      if (timerId) {
-        clearInterval(timerId);
-        setTimerId(null);
-      }
-    }
-  };
-
-  const startFiveMinuteTimer = () => {
-    setTimerStarted(true);
-
-    // Set an interval to trigger notification every 20 minutes
-    const timer = setInterval(() => {
-      triggerNotification();
-    }, 20*60*1000); // 20 minutes in milliseconds (use 3000 for testing - 3 seconds)
-
-    setTimerId(timer);
-  };
-
-  const triggerNotification = async () => {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Time to Take an Eye Break!',
-        body: 'Do a quick eye workout to keep your eyes healthy.',
-        sound: true,
-      },
-      trigger: null, // Immediately show the notification
     });
-    console.log('Notification triggered!');
-  };
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      cleanupTasks();
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
