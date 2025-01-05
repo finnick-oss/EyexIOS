@@ -5,6 +5,14 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
 const FocusMode = () => {
   const navigation = useNavigation();
   const [timerStarted, setTimerStarted] = useState(false); // State to track if timer is started
@@ -117,10 +125,11 @@ const FocusMode = () => {
         startFiveMinuteTimer();
       }
     } else {
-      console.log('Pausing timer...');
+      console.log('Stopping timer...');
       setTimerStarted(false);
       if (timerId) {
-        clearTimeout(timerId); // Clear the timer
+        clearInterval(timerId);
+        setTimerId(null);
       }
     }
   };
@@ -128,13 +137,12 @@ const FocusMode = () => {
   const startFiveMinuteTimer = () => {
     setTimerStarted(true);
 
-    // Set a 5-minute timer
-    const timer = setTimeout(() => {
-      triggerNotification(); // Trigger notification after 5 minutes
-      setTimerStarted(false); // Stop the timer
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    // Set an interval to trigger notification every 20 minutes
+    const timer = setInterval(() => {
+      triggerNotification();
+    }, 20*60*1000); // 20 minutes in milliseconds (use 3000 for testing - 3 seconds)
 
-    setTimerId(timer); // Save the timer ID to state
+    setTimerId(timer);
   };
 
   const triggerNotification = async () => {
