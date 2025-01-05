@@ -4,6 +4,7 @@ import * as Progress from 'react-native-progress';
 import { Audio } from 'expo-av';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 
 const EyeExercise = () => {
     const route = useRoute();
@@ -38,12 +39,23 @@ const EyeExercise = () => {
     const [isCompleted, setIsCompleted] = useState(false);
 
     useEffect(() => {
+        // Activate keep awake when component mounts
+        activateKeepAwake();
+
+        // Cleanup function
+        return () => {
+            deactivateKeepAwake();
+        };
+    }, []);
+
+    useEffect(() => {
         const exercisesToShow = showAllExercises ? exercises : getRandomExercises(exercises, 4);
         setSelectedExercises(exercisesToShow);
     }, [showAllExercises]);
 
     useEffect(() => {
         const backAction = async () => {
+            deactivateKeepAwake();
             await stopAndUnloadSound();
             navigation.goBack();
             return true;
@@ -56,6 +68,7 @@ const EyeExercise = () => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', async () => {
+            deactivateKeepAwake();
             await stopAndUnloadSound();
         });
 
@@ -105,6 +118,7 @@ const EyeExercise = () => {
     };
 
     const handleBackPress = async () => {
+        deactivateKeepAwake();
         await stopAndUnloadSound();
         navigation.goBack();
     };
@@ -248,6 +262,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 30,
         borderRadius: 30,
+        marginTop:20,
         marginBottom: 20,
     },
     pauseButtonText: {
@@ -258,6 +273,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 10,
         marginBottom: 20,
+        marginTop:20,
     },
     bottomButtonsContainer: {
         position: 'absolute',

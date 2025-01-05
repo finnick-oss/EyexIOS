@@ -62,21 +62,20 @@ const HealthTips = () => {
   );
 
   return (
-    <View style={[{ backgroundColor: theme.colors.background, flex: 1 , padding:'10'}]}>
-      {/* Header with increased padding */}
+    <View style={[{ backgroundColor: theme.colors.background, flex: 1 }]}>
+      {/* Header with safe area padding */}
       <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
         <Text style={[styles.headerText, { color: theme.colors.gnt_outline }]}>Health Tips</Text>
       </View>
 
-      {/* FlatList without overlapping the bottom navigation */}
       <FlatList
         data={tipsData}
         renderItem={renderCard}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
       />
 
-      {/* Bottom Navigation */}
       <View style={styles.bottomNavigationContainer}>
         <BottomNavigation />
       </View>
@@ -86,49 +85,62 @@ const HealthTips = () => {
 
 const styles = StyleSheet.create({
   header: {
-    padding: 30, // Increased padding for the header
-    paddingLeft: 20,
-    paddingTop: 30, // Added more top padding for the heading
+    paddingTop: 60, // Increased top padding for dynamic island
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
   headerText: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
   },
   contentContainer: {
-    paddingBottom: 90, // Ensure there is enough space for the bottom navigation
+    paddingHorizontal: 16, // Added horizontal padding
+    paddingBottom: 90, // Space for bottom navigation
   },
   card: {
     marginBottom: 20,
-    borderRadius: 10,
+    borderRadius: 15, // Increased border radius
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginHorizontal: 2, // Added horizontal margin
   },
   cardImage: {
     width: '100%',
-    height: 300,
+    height: 200, // Reduced height slightly
     resizeMode: 'cover',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   cardDescription: {
-    padding: 15,
+    padding: 16,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   description: {
     fontSize: 14,
+    lineHeight: 20,
   },
   sourceText: {
     fontSize: 12,
     textDecorationLine: 'underline',
-    marginTop: 10,
+    marginTop: 12,
   },
   bottomNavigationContainer: {
-    alignItems: 'center',
     position: 'absolute',
     bottom: 20,
-    left: 0,
-    right: 0,
-    height: 50, // Adjust height to match BottomNavigation height
+    left: 16,
+    right: 16,
+    alignItems: 'center',
   },
 });
 
