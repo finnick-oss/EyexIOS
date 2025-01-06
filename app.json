@@ -2,7 +2,7 @@
   "expo": {
     "name": "EyeX",
     "slug": "EyeX",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/applogo.jpg",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anvelopers.EyeX",
-      "buildNumber": "1.0.2",
+      "buildNumber": "1.0.3",
       "infoPlist": {
         "NSPushNotificationsUsageDescription": "We need to send you reminders for eye exercises to keep your eyes healthy",
         "UIBackgroundModes": [
