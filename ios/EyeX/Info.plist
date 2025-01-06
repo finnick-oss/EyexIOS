@@ -47,6 +47,7 @@
 	<key>NSAppUsesNonExemptEncryption</key>
 	<true/>
 	<key>NSPushNotificationsUsageDescription</key>
+	<string>We need to send you reminders for eye exercises to keep your eyes healthy"</string>
 	<false/>
 	<key>UIBackgroundModes</key>
 	<array>
