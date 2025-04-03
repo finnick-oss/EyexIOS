@@ -20,17 +20,6 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.3</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.anvelopers.EyeX</string>
-			</array>
-		</dict>
-	</array>
 	<key>CFBundleVersion</key>
 	<string>1.0.3</string>
 	<key>LSMinimumSystemVersion</key>
@@ -47,8 +36,7 @@
 	<key>NSAppUsesNonExemptEncryption</key>
 	<true/>
 	<key>NSPushNotificationsUsageDescription</key>
-	<string>We need to send you reminders for eye exercises to keep your eyes healthy"</string>
-	<false/>
+	<string>We need to send you reminders for eye exercises to keep your eyes healthy</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

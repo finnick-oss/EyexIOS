@@ -5,6 +5,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import RazorpayCheckout from 'react-native-razorpay';
+import PhoneNumberDialog from '../components/PhoneNumberDialog';
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,6 +15,7 @@ const HomeDashboard = () => {
   const navigation = useNavigation();
   const [progress, setProgress] = useState(0);
   const maxProgress = 4;
+  const [showPhoneDialog, setShowPhoneDialog] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -71,6 +74,49 @@ const HomeDashboard = () => {
     return colors[progress] || "#000000"; // Fallback to black if progress is out of range
   };
 
+  const handleDietPlanClick = async () => {
+    const subscription = await AsyncStorage.getItem('dietPlanSubscription');
+    const phoneNumber = await AsyncStorage.getItem('phoneNumber');
+    
+    if (subscription === 'true') {
+      navigation.navigate('DietPlan');
+    } else if (!phoneNumber) {
+      setShowPhoneDialog(true);
+    } else {
+      handlePayment();
+    }
+  };
+
+  const handlePhoneSubmit = async (phoneNumber) => {
+    await AsyncStorage.setItem('phoneNumber', phoneNumber);
+    setShowPhoneDialog(false);
+    handlePayment();
+  };
+
+  const handlePayment = () => {
+    const options = {
+      description: 'Diet Plan Subscription',
+      image: require('../assets/applogo.jpg'),
+      currency: 'USD',
+      key: 'rzp_live_L0cGXXh1H7wApF',
+      amount: '1000', // 10$ in cents
+      name: 'EyeX',
+      prefill: {
+        contact: AsyncStorage.getItem('phoneNumber'),
+      },
+      theme: { color: '#1B76BB' }
+    };
+
+    RazorpayCheckout.open(options)
+      .then(async (data) => {
+        await AsyncStorage.setItem('dietPlanSubscription', 'true');
+        navigation.navigate('DietPlan');
+      })
+      .catch((error) => {
+        console.warn(`Payment failed: ${error.code} - ${error.description}`);
+      });
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       
@@ -105,6 +151,16 @@ const HomeDashboard = () => {
 
         </View>
 
+
+        <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Diet Plan</Text>
+        <View style={styles.card}>
+          <Image source={require('../assets/dashboardassets/dietplan.jpg')} style={styles.image} />
+          {/* Show Diet Plan Button */}
+          <TouchableOpacity style={styles.showDietButton} onPress={handleDietPlanClick}>
+            <Text style={styles.showDietText}>Show Diet Plan</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Eye Exercise</Text>
         <TouchableOpacity onPress={() => navigateToEyeExercise(false)}>
           <View style={styles.card}>
@@ -132,14 +188,6 @@ const HomeDashboard = () => {
         </View>
         </TouchableOpacity>
 
-        <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Diet Plan</Text>
-<View style={styles.card}>
-  <Image source={require('../assets/dashboardassets/dietplan.jpg')} style={styles.image} />
-  {/* Show Diet Plan Button */}
-  <TouchableOpacity style={styles.showDietButton} onPress={() => {navigateToOtherTabs('DietPlan')}}>
-    <Text style={styles.showDietText}>Show Diet Plan</Text>
-  </TouchableOpacity>
-</View>
 
 
 
@@ -148,6 +196,11 @@ const HomeDashboard = () => {
       <View style={styles.bottomNavigationContainer}>
         <BottomNavigation />
       </View>
+      <PhoneNumberDialog
+        visible={showPhoneDialog}
+        onClose={() => setShowPhoneDialog(false)}
+        onSubmit={handlePhoneSubmit}
+      />
     </View>
   );
 };
