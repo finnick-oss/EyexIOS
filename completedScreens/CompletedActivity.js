@@ -5,6 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for back arrow
+import { db } from '../firebase/firebaseConfig';
+import { collection, addDoc } from 'firebase/firestore';
+import RatingModal from '../components/RatingModal';
 
 const CompletedActivity = () => {
   const navigation = useNavigation();
@@ -12,6 +15,7 @@ const CompletedActivity = () => {
   const soundObject = useRef(new Audio.Sound()).current; // Audio sound object
   const [progress, setProgress] = useState(0);
   const maxProgress = 4;
+  const [showRating, setShowRating] = useState(false);
 
   useEffect(() => {
     const backAction = () => {
@@ -63,10 +67,24 @@ const CompletedActivity = () => {
       }
     };
 
+    const checkFirstCompletion = async () => {
+      try {
+        const hasFiveStarRating = await AsyncStorage.getItem('hasFiveStarRating');
+        if (hasFiveStarRating !== 'true') {
+          setShowRating(true);
+        }
+      } catch (error) {
+        console.warn('Failed to check rating status', error);
+      }
+    };
+
     // Play sound, animate, and load progress on component mount
     playSound();
     animate();
-    loadProgress().then(() => incrementProgress());
+    loadProgress().then(() => {
+      incrementProgress();
+      checkFirstCompletion();
+    });
 
     return () => {
       // Clean up audio resources
@@ -78,6 +96,20 @@ const CompletedActivity = () => {
 
   const handleDoAgain = () => {
     navigation.navigate('EyeExercise', { showAllExercises: true }); // Navigate to EyeExercise with showAllExercises set to true
+  };
+
+  const handleRating = async (rating, isFiveStar) => {
+    try {
+      if (rating === 5) {
+        await AsyncStorage.setItem('hasFiveStarRating', 'true');
+      }
+      await addDoc(collection(db, 'ratings'), {
+        rating,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.warn('Failed to save rating', error);
+    }
   };
 
   return (
@@ -111,6 +143,11 @@ const CompletedActivity = () => {
           <Text style={styles.buttonText}>Do it again</Text>
         </TouchableOpacity>
       </Animated.View>
+      <RatingModal
+        visible={showRating}
+        onClose={() => setShowRating(false)}
+        onRate={handleRating}
+      />
     </View>
   );
 };
