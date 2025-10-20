@@ -65,33 +65,63 @@ const HomeDashboard = () => {
   // }
   // }
 
-  const handleShowDietPlan = async () => {
+const handleShowDietPlan = async () => {
   try {
     const hasPaidLocal = await AsyncStorage.getItem("hasPaid");
     const phoneNumber = await AsyncStorage.getItem("phoneNumber");
 
-  
     if (hasPaidLocal === "true") {
       navigation.navigate("DietPlan");
       return;
     }
-    if (phoneNumber) {
-      const docRef = doc(db, "subscriptions", phoneNumber);
-      const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists() && docSnap.data().status === "paid") {
-        
-        await AsyncStorage.setItem("hasPaid", "true");
-        navigation.navigate("DietPlan");
-        return;
-      }
+    if (!phoneNumber) {
+      Alert.prompt(
+        "Restore Subscription",
+        "Enter your registered mobile number to check your plan status.",
+        async (enteredPhoneNumber) => {
+          if (!enteredPhoneNumber || enteredPhoneNumber.trim().length !== 10) {
+            Alert.alert("Invalid Number", "Please enter a valid 10-digit number.");
+            return;
+          }
+
+          const docRef = doc(db, "subscriptions", enteredPhoneNumber.trim());
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists() && docSnap.data().status === "paid") {
+            await AsyncStorage.setItem("hasPaid", "true");
+            await AsyncStorage.setItem("phoneNumber", enteredPhoneNumber.trim());
+            Alert.alert("Success", "Your subscription has been restored!");
+            navigation.navigate("DietPlan");
+          } else {
+            Alert.alert(
+              "Not Found",
+              "No active subscription found for this number. Please subscribe first."
+            );
+            navigation.navigate("NumForm");
+          }
+        }
+      );
+      return;
     }
+
+    const docRef = doc(db, "subscriptions", phoneNumber);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists() && docSnap.data().status === "paid") {
+      await AsyncStorage.setItem("hasPaid", "true");
+      navigation.navigate("DietPlan");
+      return;
+    }
+
     navigation.navigate("NumForm");
   } catch (error) {
     console.error("Error checking payment:", error);
+    Alert.alert("Error", "Unable to verify your subscription right now.");
     navigation.navigate("NumForm");
   }
 };
+
 
   const navigateToEyeExercise = (showAllExercises) => {
     navigation.navigate('EyeExercise', { showAllExercises });
