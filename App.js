@@ -14,7 +14,7 @@ import CompletedActivity from './completedScreens/CompletedActivity';
 import HealthTips from './tips/HealthTips';
 import HealthTipsFD from './tips/HealthTipsFD';
 import DietPlan from './dietplan/DietPlan';
-
+import NumForm from './dashboard/form/NumForm';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
@@ -44,8 +44,10 @@ const App = () => {
           <Stack.Screen name="HealthTips" component={HealthTips} />
           <Stack.Screen name="HealthTipsFD" component={HealthTipsFD} />
           <Stack.Screen name="DietPlan" component={DietPlan} />
+          <Stack.Screen name="NumForm" component={NumForm} />
         </Stack.Navigator>
       </NavigationContainer></GluestackUIProvider>
+
   );
 };
 

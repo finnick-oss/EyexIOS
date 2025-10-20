@@ -4,10 +4,13 @@ import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView
 import { useTheme } from '../themes/ThemeContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 // import DietPlan from '@/dietplan/DietPlan';
 const { width, height } = Dimensions.get('window');
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { db } from "@/firebase/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 const HomeDashboard = () => {
   const theme = useTheme();
@@ -43,24 +46,53 @@ const HomeDashboard = () => {
     }, [])
   );
   // Function to handle Razorpay checkout
-  const openSubscriptionCheckout = async(navigation)=>{
-    try{
-      const options ={
-        description:'Subscription for Diet Plan',
-        image:'./assets/applogo.jpg',
-        currency:'INR',
-        key:'rzp_test_RPm0EYdQ9lG9xp',
-        subscription_id:'sub_RPnMVb3wVNHuSi',
-        name:'Eyex Subscription',
-        theme:{color:'#53a20e'},
+  // const openSubscriptionCheckout = async(navigation)=>{
+  //   try{
+  //     const options ={
+  //       description:'Subscription for Diet Plan',
+  //       image:'./assets/applogo.jpg',
+  //       currency:'INR',
+  //       key:'rzp_test_RPm0EYdQ9lG9xp',
+  //       subscription_id:'sub_RPnMVb3wVNHuSi',
+  //       name:'Eyex Subscription',
+  //       theme:{color:'#53a20e'},
+  //     }
+  //   const paymentResult = await RazorpayCheckout.open(options);
+  //   alert(`Subscription successful. Payment ID: ${paymentResult.razorpay_payment_id}`);
+  //   navigation.navigate('DietPlan');
+  //   }catch (error) {
+  //   alert(`Payment failed: ${error.code} | ${error.description}`);
+  // }
+  // }
+
+  const handleShowDietPlan = async () => {
+  try {
+    const hasPaidLocal = await AsyncStorage.getItem("hasPaid");
+    const phoneNumber = await AsyncStorage.getItem("phoneNumber");
+
+  
+    if (hasPaidLocal === "true") {
+      navigation.navigate("DietPlan");
+      return;
+    }
+    if (phoneNumber) {
+      const docRef = doc(db, "subscriptions", phoneNumber);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists() && docSnap.data().status === "paid") {
+        
+        await AsyncStorage.setItem("hasPaid", "true");
+        navigation.navigate("DietPlan");
+        return;
       }
-    const paymentResult = await RazorpayCheckout.open(options);
-    alert(`Subscription successful. Payment ID: ${paymentResult.razorpay_payment_id}`);
-    navigation.navigate('DietPlan');
-    }catch (error) {
-    alert(`Payment failed: ${error.code} | ${error.description}`);
+    }
+    navigation.navigate("NumForm");
+  } catch (error) {
+    console.error("Error checking payment:", error);
+    navigation.navigate("NumForm");
   }
-  }
+};
+
   const navigateToEyeExercise = (showAllExercises) => {
     navigation.navigate('EyeExercise', { showAllExercises });
   };
@@ -152,17 +184,30 @@ const HomeDashboard = () => {
         </TouchableOpacity>
 
         <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Diet Plan</Text>
-<View style={styles.card}>
-  <Image source={require('../assets/dashboardassets/dietplan.jpg')} style={styles.image} />
+        <View style={styles.card}>
+        <Image source={require('../assets/dashboardassets/dietplan.jpg')} style={styles.image} />
   {/* Show Diet Plan Button */}
 
   {/* <TouchableOpacity onPressIn={()=>openSubscriptionCheckout(navigation)} style={styles.showDietButton} onPress={() => {navigateToOtherTabs('DietPlan')}}> */}
     {/* <Text style={styles.showDietText}>Show Diet Plan</Text> */}
   {/* </TouchableOpacity>/ */}
 
-  <TouchableOpacity
+  {/* <TouchableOpacity
   style={styles.showDietButton}
-  onPress={() => openSubscriptionCheckout(navigation)}
+  onPress={() => openSubscriptionCheckout(navigation)} 
+>
+  <Text style={styles.showDietText}>Show Diet Plan</Text>
+</TouchableOpacity> */}
+
+{/* <TouchableOpacity
+  style={styles.showDietButton}
+  onPress={() => navigation.navigate('NumForm')}
+>
+  <Text style={styles.showDietText}>Show Diet Plan</Text>
+</TouchableOpacity> */}
+<TouchableOpacity
+  style={styles.showDietButton}
+  onPress={handleShowDietPlan}
 >
   <Text style={styles.showDietText}>Show Diet Plan</Text>
 </TouchableOpacity>
