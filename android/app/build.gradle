@@ -86,13 +86,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.eyex"
+    namespace 'com.anvelopers.EyeX'
     defaultConfig {
-        applicationId "com.eyex"
+        applicationId 'com.anvelopers.EyeX'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.3"
     }
     signingConfigs {
         debug {

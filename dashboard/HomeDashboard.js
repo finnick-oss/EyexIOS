@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
+import RazorpayCheckout from 'react-native-razorpay';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BottomNavigation from '../bottomnavigationpkg/BottomNavigation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
-
+// import DietPlan from '@/dietplan/DietPlan';
 const { width, height } = Dimensions.get('window');
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { db } from "@/firebase/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 const HomeDashboard = () => {
   const theme = useTheme();
@@ -41,6 +45,83 @@ const HomeDashboard = () => {
       fetchProgress();
     }, [])
   );
+  // Function to handle Razorpay checkout
+  // const openSubscriptionCheckout = async(navigation)=>{
+  //   try{
+  //     const options ={
+  //       description:'Subscription for Diet Plan',
+  //       image:'./assets/applogo.jpg',
+  //       currency:'INR',
+  //       key:'rzp_test_RPm0EYdQ9lG9xp',
+  //       subscription_id:'sub_RPnMVb3wVNHuSi',
+  //       name:'Eyex Subscription',
+  //       theme:{color:'#53a20e'},
+  //     }
+  //   const paymentResult = await RazorpayCheckout.open(options);
+  //   alert(`Subscription successful. Payment ID: ${paymentResult.razorpay_payment_id}`);
+  //   navigation.navigate('DietPlan');
+  //   }catch (error) {
+  //   alert(`Payment failed: ${error.code} | ${error.description}`);
+  // }
+  // }
+
+const handleShowDietPlan = async () => {
+  try {
+    const hasPaidLocal = await AsyncStorage.getItem("hasPaid");
+    const phoneNumber = await AsyncStorage.getItem("phoneNumber");
+
+    if (hasPaidLocal === "true") {
+      navigation.navigate("DietPlan");
+      return;
+    }
+
+    if (!phoneNumber) {
+      Alert.prompt(
+        "Restore Subscription",
+        "Enter your registered mobile number to check your plan status.",
+        async (enteredPhoneNumber) => {
+          if (!enteredPhoneNumber || enteredPhoneNumber.trim().length !== 10) {
+            Alert.alert("Invalid Number", "Please enter a valid 10-digit number.");
+            return;
+          }
+
+          const docRef = doc(db, "subscriptions", enteredPhoneNumber.trim());
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists() && docSnap.data().status === "paid") {
+            await AsyncStorage.setItem("hasPaid", "true");
+            await AsyncStorage.setItem("phoneNumber", enteredPhoneNumber.trim());
+            Alert.alert("Success", "Your subscription has been restored!");
+            navigation.navigate("DietPlan");
+          } else {
+            Alert.alert(
+              "Not Found",
+              "No active subscription found for this number. Please subscribe first."
+            );
+            navigation.navigate("NumForm");
+          }
+        }
+      );
+      return;
+    }
+
+    const docRef = doc(db, "subscriptions", phoneNumber);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists() && docSnap.data().status === "paid") {
+      await AsyncStorage.setItem("hasPaid", "true");
+      navigation.navigate("DietPlan");
+      return;
+    }
+
+    navigation.navigate("NumForm");
+  } catch (error) {
+    console.error("Error checking payment:", error);
+    Alert.alert("Error", "Unable to verify your subscription right now.");
+    navigation.navigate("NumForm");
+  }
+};
+
 
   const navigateToEyeExercise = (showAllExercises) => {
     navigation.navigate('EyeExercise', { showAllExercises });
@@ -133,12 +214,34 @@ const HomeDashboard = () => {
         </TouchableOpacity>
 
         <Text style={[styles.cardTitle, { color: theme.colors.gnt_outline }]}>Diet Plan</Text>
-<View style={styles.card}>
-  <Image source={require('../assets/dashboardassets/dietplan.jpg')} style={styles.image} />
+        <View style={styles.card}>
+        <Image source={require('../assets/dashboardassets/dietplan.jpg')} style={styles.image} />
   {/* Show Diet Plan Button */}
-  <TouchableOpacity style={styles.showDietButton} onPress={() => {navigateToOtherTabs('DietPlan')}}>
-    <Text style={styles.showDietText}>Show Diet Plan</Text>
-  </TouchableOpacity>
+
+  {/* <TouchableOpacity onPressIn={()=>openSubscriptionCheckout(navigation)} style={styles.showDietButton} onPress={() => {navigateToOtherTabs('DietPlan')}}> */}
+    {/* <Text style={styles.showDietText}>Show Diet Plan</Text> */}
+  {/* </TouchableOpacity>/ */}
+
+  {/* <TouchableOpacity
+  style={styles.showDietButton}
+  onPress={() => openSubscriptionCheckout(navigation)} 
+>
+  <Text style={styles.showDietText}>Show Diet Plan</Text>
+</TouchableOpacity> */}
+
+{/* <TouchableOpacity
+  style={styles.showDietButton}
+  onPress={() => navigation.navigate('NumForm')}
+>
+  <Text style={styles.showDietText}>Show Diet Plan</Text>
+</TouchableOpacity> */}
+<TouchableOpacity
+  style={styles.showDietButton}
+  onPress={handleShowDietPlan}
+>
+  <Text style={styles.showDietText}>Show Diet Plan</Text>
+</TouchableOpacity>
+
 </View>
 
 

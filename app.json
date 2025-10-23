@@ -61,9 +61,9 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
+          // "icon": "./assets/notification-icon.png",
           "color": "#ffffff",
-          "sounds": ["./assets/notification-sound.wav"],
+          // "sounds": ["./assets/notification-sound.wav"],
           "mode": "production",
           "iosDisplayInForeground": true,
           "iosHideInForeground": false
